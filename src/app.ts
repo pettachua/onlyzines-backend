@@ -19,6 +19,9 @@ app.use(
 app.use(express.json({ limit: '25mb' }));
 
 // Routes
+app.get('/', (_req, res) => {
+  res.send('OnlyZines API is running 🚀');
+});
 app.use('/api', routes);
 
 // Error handler
