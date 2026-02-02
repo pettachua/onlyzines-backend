@@ -7,10 +7,28 @@ import { ZodError } from 'zod';
 
 const app = express();
 
-// CORS
+// CORS — allow both platform and builder origins
+const allowedOrigins = [
+  process.env.PLATFORM_URL,   // https://onlyzines.com
+  process.env.BUILDER_URL,    // https://builder.onlyzines.com
+  // Keep FRONTEND_URL for backward compat
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // In development, allow localhost
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );
